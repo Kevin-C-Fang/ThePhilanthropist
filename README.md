@@ -9,3 +9,5 @@ Plan on implementing:
 2. Donating gold to rebuild a village after being raided
 3. Player can be ambushed somehow because his donations have attracted greedy eyes
 
+Credits:
+- Bannerlord.Module.Template by BUTR | https://github.com/BUTR/Bannerlord.Module.Template
