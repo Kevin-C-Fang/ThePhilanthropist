@@ -1,6 +1,6 @@
 # ThePhilanthropist
 
-This mod is a flavor mod with goal of roleplaying as a philanthropist. By donating to the settlements inhabitants, we can increase the settlements prosperity.
+Bannerlord flavor mod with goal of roleplaying as a philanthropist. By donating to the settlements inhabitants, you can increase the settlements prosperity.
 
 Currently, the mod only allows donation to towns and villages with a cap of 5000 for towns and 600 for villages.
 
