@@ -20,6 +20,9 @@ namespace ThePhilanthropist
 {
     public class ThePhilanthropistCampaignBehavior : CampaignBehaviorBase
     {
+        private const float TownProsperityLimit = 5000f;
+        private const float VillageHearthLimit = 600f;
+
         public override void RegisterEvents()
         {
             CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
@@ -52,14 +55,14 @@ namespace ThePhilanthropist
                 "Your resolve to help these people stokes the fire within you, your desire to be good. \n\n" +
                 "You will help these people, there is no doubt. You will donate what you can.";
 
-            if (settlement.IsTown && settlement.Town.Prosperity < 5000f)
+            if (settlement.IsTown && settlement.Town.Prosperity < TownProsperityLimit)
             {
                 TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(this.OnDonateToSettlement), 
                     null, false, new Func<string, Tuple<bool, string>>(IsDonationTextValid), "", "");
 
                 InformationManager.ShowTextInquiry(data, false, false);
             }
-            else if (settlement.IsVillage && settlement.Village.Hearth < 600f)
+            else if (settlement.IsVillage && settlement.Village.Hearth < VillageHearthLimit)
             {
                 TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(this.OnDonateToSettlement), 
                     null, false, new Func<string, Tuple<bool, string>>(IsDonationTextValid), "", "");
@@ -91,11 +94,13 @@ namespace ThePhilanthropist
 
             if (settlement.IsTown)
             {
-                settlement.Town.Prosperity = settlement.Town.Prosperity + prosperityIncreaseAmount > 5000f ? 5000f : settlement.Town.Prosperity + prosperityIncreaseAmount;
+                settlement.Town.Prosperity = settlement.Town.Prosperity + prosperityIncreaseAmount > TownProsperityLimit ? TownProsperityLimit : 
+                    settlement.Town.Prosperity + prosperityIncreaseAmount;
             }
             else if (settlement.IsVillage)
             {
-                settlement.Village.Hearth = settlement.Village.Hearth + prosperityIncreaseAmount > 600f ? 600f : settlement.Village.Hearth + prosperityIncreaseAmount;
+                settlement.Village.Hearth = settlement.Village.Hearth + prosperityIncreaseAmount > VillageHearthLimit ? VillageHearthLimit : 
+                    settlement.Village.Hearth + prosperityIncreaseAmount;
             }
 
             Hero.MainHero.ChangeHeroGold(-donationAmount);
@@ -115,33 +120,22 @@ namespace ThePhilanthropist
             {
                 warningText = "Input text cannot be longer than 10 characters.";
             }
-            else if(text.Any((char c) => char.IsLetter(c) || !char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)))
+            else if(text.Any((char c) => char.IsLetter(c) || !char.IsLetterOrDigit(c)))
             {
                 warningText = "Input text cannot include letters, special characters, or spaces.";
             }
             else if (int.TryParse(text, out int donationAmount))
             {
-                float prosperityChange = donationAmount / 12f;
                 Settlement settlement = Settlement.CurrentSettlement;
-
-                if (settlement.IsTown && settlement.Town.Prosperity + prosperityChange > 5000.0833f)
-                {
-                    float goldNeedToReachMaxProsperity = (float)Math.Floor((5000.0833f - settlement.Town.Prosperity) * 12f);
-
-                    warningText = goldNeedToReachMaxProsperity < 0f ? string.Empty : $"You can only donate {goldNeedToReachMaxProsperity}" + 
-                        " {GOLD_ICON} or else the lord of this settlement will speculate on your intentions.";
-                }
-                else if (settlement.IsVillage && settlement.Village.Hearth + prosperityChange > 600.0833f)
-                {
-                    float goldNeedToReachMaxProsperity = (float)Math.Floor((600.0833f - settlement.Village.Hearth) * 12f);
-
-                    warningText = goldNeedToReachMaxProsperity < 0f ? string.Empty : $"You can only donate {goldNeedToReachMaxProsperity}" + 
-                        " {GOLD_ICON} or else the lord of this settlement will speculate on your intentions.";
-                }
 
                 if (donationAmount > Hero.MainHero.Gold)
                 {
                     warningText = "You don't have enough {GOLD_ICON}";
+                }
+                else
+                {
+                    warningText = settlement.IsTown ? GetDonationWarnMessage(TownProsperityLimit, settlement.Town.Prosperity, donationAmount) : 
+                        GetDonationWarnMessage(VillageHearthLimit, settlement.Village.Hearth, donationAmount);
                 }
             }
 
@@ -150,6 +144,15 @@ namespace ThePhilanthropist
             return new Tuple<bool, string>(isDonationValid, warningText);
         }
 
+        private string GetDonationWarnMessage(float limit, float currentProsperity, int donationAmount)
+        {
+            float prosperityNeeded = limit - currentProsperity;
+
+            int goldNeededToReachMaxProsperity = (int)Math.Round(prosperityNeeded * 12f, MidpointRounding.AwayFromZero);
+
+            return donationAmount <= goldNeededToReachMaxProsperity ? string.Empty : $"You can only donate {goldNeededToReachMaxProsperity}" +
+                " {GOLD_ICON} or else the lord of this settlement will speculate on your intentions.";
+        }
         private void DisplayMessage(string text)
         {
             InformationManager.DisplayMessage(new InformationMessage(text));
