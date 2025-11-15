@@ -4,9 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
+using TaleWorlds.CampaignSystem.Actions;
+using TaleWorlds.CampaignSystem.CampaignBehaviors;
 using TaleWorlds.CampaignSystem.ComponentInterfaces;
+using TaleWorlds.CampaignSystem.Encounters;
 using TaleWorlds.CampaignSystem.GameMenus;
 using TaleWorlds.CampaignSystem.GameState;
+using TaleWorlds.CampaignSystem.Overlay;
+using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.CampaignSystem.ViewModelCollection;
 using TaleWorlds.CampaignSystem.ViewModelCollection.GameMenu.Overlay;
@@ -14,6 +19,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
+using MathF = TaleWorlds.Library.MathF;
 
 
 namespace ThePhilanthropist
@@ -26,6 +32,7 @@ namespace ThePhilanthropist
         public override void RegisterEvents()
         {
             CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
+            CampaignEvents.HourlyTickSettlementEvent.AddNonSerializedListener(this, OnHourlyTickSettlementEvent);
         }
 
         private void OnSessionLaunched(CampaignGameStarter starter)
@@ -36,10 +43,84 @@ namespace ThePhilanthropist
         private void AddGameMenus(CampaignGameStarter starter)
         {
             starter.AddGameMenuOption("town", "settlement_donation", "Donate to townsfolk", new GameMenuOption.OnConditionDelegate(settlement_donation_on_condition),
-                new GameMenuOption.OnConsequenceDelegate(settlement_donation_on_consequence), false, 8, false, null);
+                new GameMenuOption.OnConsequenceDelegate(settlement_donation_on_consequence), false, -1, false, null);
             starter.AddGameMenuOption("village", "settlement_donation", "Donate to villagers", new GameMenuOption.OnConditionDelegate(settlement_donation_on_condition),
-                new GameMenuOption.OnConsequenceDelegate(settlement_donation_on_consequence), false, 8, false, null);
+                new GameMenuOption.OnConsequenceDelegate(settlement_donation_on_consequence), false, -1, false, null);
+
+            starter.AddGameMenuOption("village_looted", "rebuild_village", "Help rebuild {VILLAGE_NAME}", new GameMenuOption.OnConditionDelegate(rebuild_village_on_condition), 
+                new GameMenuOption.OnConsequenceDelegate(rebuild_village_on_consequence), false, -1, false, null);
+
+            string rebuildText = "In the distance, smoke and burned flesh fill the air. The screams of innocents can be heard echoing through the wind. You divert course hoping to save as many as possible. \n\n" +
+                "As you enter {VILLAGE_NAME}, savagery beyond recognition is displayed, the details too horrifying to speak of. Those remaining have nothing left. Their homes, their families, their loved ones, gone. \n" +
+                "There is nothing that can be done to stop their suffering, but to leave helpless would be an immoral act, one that cannot be washed away. It would go against every principle of your being. \n\n" +
+                "As you watch the villagers carry their dead, you realize you can help. Immediately, you command your men to help carry their dead and rebuild their home. ";
+
+            starter.AddWaitGameMenu("rebuild_village", rebuildText, new OnInitDelegate(rebuild_village_on_init), new OnConditionDelegate(back_on_condition), new OnConsequenceDelegate(wait_menu_rebuild_village_on_consequence),
+                new OnTickDelegate(wait_menu_rebuild_village_on_tick), GameMenu.MenuAndOptionType.WaitMenuShowOnlyProgressOption,
+                GameOverlays.MenuOverlayType.None, 0f, GameMenu.MenuFlags.None, null);
+
+            starter.AddGameMenuOption("rebuild_village", "rebuild_village_end", "End Rebuilding", new GameMenuOption.OnConditionDelegate(leave_on_condition),
+                new GameMenuOption.OnConsequenceDelegate(wait_menu_end_rebuilding_on_consequence), true, -1, false, null);
         }
+
+        private void wait_menu_end_rebuilding_on_consequence(MenuCallbackArgs args)
+        {
+            PlayerEncounter.Finish(true);
+        }
+
+        private bool leave_on_condition(MenuCallbackArgs args)
+        {
+            args.optionLeaveType = GameMenuOption.LeaveType.Leave;
+            return true;
+        }
+        private void OnHourlyTickSettlementEvent(Settlement settlement)
+        {
+            Settlement currentSettlement = Settlement.CurrentSettlement;
+
+            if (settlement.Equals(currentSettlement))
+            {
+                ExplainedNumber explainedNumber = new ExplainedNumber(0.02f + MobileParty.MainParty.Party.TotalStrength/6000f, false, null);
+                IncreaseSettlementHealthAction.Apply(currentSettlement, explainedNumber.ResultNumber);
+            }
+        }
+
+        private void wait_menu_rebuild_village_on_tick(MenuCallbackArgs args, CampaignTime dt)
+        {
+            args.MenuContext.GameMenu.SetProgressOfWaitingInMenu(Settlement.CurrentSettlement.SettlementHitPoints);
+        }
+
+        private void wait_menu_rebuild_village_on_consequence(MenuCallbackArgs args)
+        {
+            GameMenu.SwitchToMenu("village");
+        }
+
+        private bool back_on_condition(MenuCallbackArgs args)
+        {
+            return true;
+        }
+
+        private void rebuild_village_on_init(MenuCallbackArgs args)
+        {
+            MBTextManager.SetTextVariable("VILLAGE_NAME", PlayerEncounter.EncounterSettlement.Name, false);
+        }
+
+        private bool rebuild_village_on_condition(MenuCallbackArgs args)
+        {
+            MBTextManager.SetTextVariable("VILLAGE_NAME", PlayerEncounter.EncounterSettlement.Name, false);
+            args.optionLeaveType = GameMenuOption.LeaveType.Craft;
+            string restrictedRebuildVillageText = "You cannot help rebuild a village of an enemy kingdom.";
+
+            args.IsEnabled = !FactionManager.IsAtWarAgainstFaction(Hero.MainHero.MapFaction, Settlement.CurrentSettlement.MapFaction);
+            args.Tooltip = args.IsEnabled ? null : new TextObject(restrictedRebuildVillageText);
+
+            return true;
+        }
+
+        private void rebuild_village_on_consequence(MenuCallbackArgs args)
+        {
+            GameMenu.SwitchToMenu("rebuild_village");
+        }
+
         private bool settlement_donation_on_condition(MenuCallbackArgs args)
         {
             args.optionLeaveType = GameMenuOption.LeaveType.Bribe;
@@ -147,7 +228,7 @@ namespace ThePhilanthropist
         private string GetDonationWarnMessage(float limit, float currentProsperity, int donationAmount)
         {
             float prosperityNeeded = limit - currentProsperity;
-
+            
             int goldNeededToReachMaxProsperity = (int)Math.Round(prosperityNeeded * 12f, MidpointRounding.AwayFromZero);
 
             return donationAmount <= goldNeededToReachMaxProsperity ? string.Empty : $"You can only donate {goldNeededToReachMaxProsperity}" +
