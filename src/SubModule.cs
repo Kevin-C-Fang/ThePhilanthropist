@@ -3,7 +3,7 @@ using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
 
 
-namespace ThePhilanthropist
+namespace ThePhilanthropist.src
 {
     public class SubModule : MBSubModuleBase
     {

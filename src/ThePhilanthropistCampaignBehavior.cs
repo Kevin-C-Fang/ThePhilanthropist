@@ -22,7 +22,7 @@ using TaleWorlds.MountAndBlade;
 using MathF = TaleWorlds.Library.MathF;
 
 
-namespace ThePhilanthropist
+namespace ThePhilanthropist.src
 {
     public class ThePhilanthropistCampaignBehavior : CampaignBehaviorBase
     {
@@ -139,14 +139,14 @@ namespace ThePhilanthropist
 
             if (settlement.IsTown && settlement.Town.Prosperity < TownProsperityLimit)
             {
-                TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(this.OnDonateToSettlement), 
+                TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(OnDonateToSettlement), 
                     null, false, new Func<string, Tuple<bool, string>>(IsDonationTextValid), "", "");
 
                 InformationManager.ShowTextInquiry(data, false, false);
             }
             else if (settlement.IsVillage && settlement.Village.Hearth < VillageHearthLimit)
             {
-                TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(this.OnDonateToSettlement), 
+                TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(OnDonateToSettlement), 
                     null, false, new Func<string, Tuple<bool, string>>(IsDonationTextValid), "", "");
 
                 InformationManager.ShowTextInquiry(data, false, false);
@@ -202,7 +202,7 @@ namespace ThePhilanthropist
             {
                 warningText = "Input text cannot be longer than 10 characters.";
             }
-            else if(text.Any((char c) => char.IsLetter(c) || !char.IsLetterOrDigit(c)))
+            else if(text.Any((c) => char.IsLetter(c) || !char.IsLetterOrDigit(c)))
             {
                 warningText = "Input text cannot include letters, special characters, or spaces.";
             }

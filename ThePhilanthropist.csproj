@@ -67,7 +67,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="src\" />
     <Folder Include="_Module\Assets\" />
     <Folder Include="_Module\AssetSources\" />
   </ItemGroup>
