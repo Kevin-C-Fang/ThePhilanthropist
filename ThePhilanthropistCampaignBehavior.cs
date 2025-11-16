@@ -102,6 +102,7 @@ namespace ThePhilanthropist
         private void rebuild_village_on_init(MenuCallbackArgs args)
         {
             MBTextManager.SetTextVariable("VILLAGE_NAME", PlayerEncounter.EncounterSettlement.Name, false);
+            args.MenuContext.SetBackgroundMeshName(Settlement.CurrentSettlement.SettlementComponent.WaitMeshName);
         }
 
         private bool rebuild_village_on_condition(MenuCallbackArgs args)
