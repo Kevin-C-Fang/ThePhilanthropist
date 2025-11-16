@@ -4,7 +4,7 @@ Bannerlord mod with goal of roleplaying as a philanthropist.
 
 Features:
 - Donate to towns/villages to increase prosperity. Prosperity Cap: Town(5000), Village(600)
-- Help rebuild a raided village where time to rebuild is based on troop strength.
+- Help rebuild a raided village, troop strength can make rebuilding faster.
 
 Plan on implementing:
 1. Donating gold to notables to increase power which will increase odds of higher tier troops
