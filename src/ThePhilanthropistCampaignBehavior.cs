@@ -71,7 +71,7 @@ namespace ThePhilanthropist.src
         {
             Settlement currentSettlement = Settlement.CurrentSettlement;
 
-            if (settlement.Equals(currentSettlement))
+            if (settlement.Equals(currentSettlement) && settlement.IsRaided)
             {
                 ExplainedNumber explainedNumber = new ExplainedNumber(0.02f + MobileParty.MainParty.Party.TotalStrength/6000f, false, null);
                 IncreaseSettlementHealthAction.Apply(currentSettlement, explainedNumber.ResultNumber);
