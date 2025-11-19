@@ -214,7 +214,7 @@ namespace ThePhilanthropist.src
             float prosperityNeeded = limit - currentProsperity;
             
             int goldNeededToReachMaxProsperity = (int)Math.Round(prosperityNeeded * 12f, MidpointRounding.AwayFromZero);
-            TextObject warningText = GameTexts.FindText("settlement_donation_warning");
+            TextObject warningText = Settlement.CurrentSettlement.Owner == Hero.MainHero ? GameTexts.FindText("settlement_donation_warning_owner") : GameTexts.FindText("settlement_donation_warning_non_owner");
             warningText.SetTextVariable("GOLD_AMOUNT", goldNeededToReachMaxProsperity);
 
             return donationAmount <= goldNeededToReachMaxProsperity ? string.Empty : warningText.ToString();
