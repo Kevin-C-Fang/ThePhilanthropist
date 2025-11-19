@@ -116,6 +116,8 @@ namespace ThePhilanthropist.src
         private bool settlement_donation_on_condition(MenuCallbackArgs args)
         {
             args.optionLeaveType = GameMenuOption.LeaveType.Bribe;
+            args.IsEnabled = !FactionManager.IsAtWarAgainstFaction(Hero.MainHero.MapFaction, Settlement.CurrentSettlement.MapFaction);
+            args.Tooltip = args.IsEnabled ? null : GameTexts.FindText("enemy_settlement_donation_warning");
             return true;
         }
 

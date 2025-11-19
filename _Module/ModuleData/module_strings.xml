@@ -5,7 +5,7 @@
 	<string id="settlement_donation_warning" text="You can only donate {GOLD_AMOUNT} {GOLD_ICON} or else the lord of this settlement will speculate on your intentions." />
 	<string id="settlement_rebuild_description" text="In the distance, smoke and burned flesh fill the air. The screams of innocents can be heard echoing through the wind. You divert course hoping to save as many as possible.{newline}{newline}As you enter the village, savagery beyond recognition is displayed, the details too horrifying to speak of. Those remaining have nothing left. Their homes, their families, their loved ones, gone.{newline}{newline}There is nothing that can be done to stop their suffering, but to leave helpless would be an immoral act, one that cannot be washed away. It would go against every principle of your being.{newline}{newline}As you watch the villagers carry their dead, you realize you can help. Immediately, you command your men to help carry their dead and rebuild their home. " />
 	<string id="enemy_settlement_rebuild_warning" text="You cannot help rebuild a village of an enemy kingdom." />
-	<string id="" text="" />5000
+	<string id="enemy_settlement_donation_warning" text="You cannot donate to the people of an enemy kingdom." />
 	<string id="" text="" />
 	<string id="" text="" />
 
