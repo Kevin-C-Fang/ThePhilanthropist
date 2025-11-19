@@ -50,15 +50,9 @@ namespace ThePhilanthropist.src
             starter.AddGameMenuOption("village_looted", "rebuild_village", "Help rebuild {VILLAGE_NAME}", new GameMenuOption.OnConditionDelegate(rebuild_village_on_condition), 
                 new GameMenuOption.OnConsequenceDelegate(rebuild_village_on_consequence), false, -1, false, null);
 
-            string rebuildText = "In the distance, smoke and burned flesh fill the air. The screams of innocents can be heard echoing through the wind. You divert course hoping to save as many as possible. \n\n" +
-                "As you enter {VILLAGE_NAME}, savagery beyond recognition is displayed, the details too horrifying to speak of. Those remaining have nothing left. Their homes, their families, their loved ones, gone. \n" +
-                "There is nothing that can be done to stop their suffering, but to leave helpless would be an immoral act, one that cannot be washed away. It would go against every principle of your being. \n\n" +
-                "As you watch the villagers carry their dead, you realize you can help. Immediately, you command your men to help carry their dead and rebuild their home. ";
-
-            starter.AddWaitGameMenu("rebuild_village", rebuildText, new OnInitDelegate(rebuild_village_on_init), new OnConditionDelegate(back_on_condition), new OnConsequenceDelegate(wait_menu_rebuild_village_on_consequence),
+            starter.AddWaitGameMenu("rebuild_village", GameTexts.FindText("settlement_rebuild_description").ToString(), new OnInitDelegate(rebuild_village_on_init), new OnConditionDelegate(back_on_condition), new OnConsequenceDelegate(wait_menu_rebuild_village_on_consequence),
                 new OnTickDelegate(wait_menu_rebuild_village_on_tick), GameMenu.MenuAndOptionType.WaitMenuShowOnlyProgressOption,
                 GameOverlays.MenuOverlayType.None, 0f, GameMenu.MenuFlags.None, null);
-
             starter.AddGameMenuOption("rebuild_village", "rebuild_village_end", "End Rebuilding", new GameMenuOption.OnConditionDelegate(leave_on_condition),
                 new GameMenuOption.OnConsequenceDelegate(wait_menu_end_rebuilding_on_consequence), true, -1, false, null);
         }
@@ -101,7 +95,6 @@ namespace ThePhilanthropist.src
 
         private void rebuild_village_on_init(MenuCallbackArgs args)
         {
-            MBTextManager.SetTextVariable("VILLAGE_NAME", PlayerEncounter.EncounterSettlement.Name, false);
             args.MenuContext.SetBackgroundMeshName(Settlement.CurrentSettlement.SettlementComponent.WaitMeshName);
         }
 
@@ -109,10 +102,8 @@ namespace ThePhilanthropist.src
         {
             MBTextManager.SetTextVariable("VILLAGE_NAME", PlayerEncounter.EncounterSettlement.Name, false);
             args.optionLeaveType = GameMenuOption.LeaveType.Craft;
-            string restrictedRebuildVillageText = "You cannot help rebuild a village of an enemy kingdom.";
-
             args.IsEnabled = !FactionManager.IsAtWarAgainstFaction(Hero.MainHero.MapFaction, Settlement.CurrentSettlement.MapFaction);
-            args.Tooltip = args.IsEnabled ? null : new TextObject(restrictedRebuildVillageText);
+            args.Tooltip = args.IsEnabled ? null : GameTexts.FindText("enemy_settlement_rebuild_warning");
 
             return true;
         }
@@ -131,11 +122,7 @@ namespace ThePhilanthropist.src
         private void settlement_donation_on_consequence(MenuCallbackArgs args)
         {
             Settlement settlement = Settlement.CurrentSettlement;
-            string donationText = "After entering the settlement, you see the poor and weary souls that wander its streets. \n\n" +
-                "Children covered in mud, begging for denars. Men and women alike starving, their eyes red and mad with hunger. \n\n" +
-                "You can not help but feel the bleakness of life and the quiet despair that fills it. " +
-                "Your resolve to help these people stokes the fire within you, your desire to be good. \n\n" +
-                "You will help these people, there is no doubt. You will donate what you can.";
+            string donationText = GameTexts.FindText("settlement_donation_description").ToString();
 
             if (settlement.IsTown && settlement.Town.Prosperity < TownProsperityLimit)
             {
@@ -153,13 +140,7 @@ namespace ThePhilanthropist.src
             }
             else
             {
-                string donationRejectedText = "A crowd gathers as word spreads of your intent to donate to the welfare of this settlement. \n\n" +
-                    "A representative of the people steps forward and says \"Ser, we cannot accept. Our settlement has flourished beyond imagination. " +
-                    "We are content and well fed. Please spread your kindness to others as you have done here.\" \n\n" +
-                    "Astonished, you look around the crowd and see in each person's face a smile that lights the sky. \n\n" +
-                    "Gratified by the virtue of these people, you accept the crowds wishes and continue on for there are still those in need.";
-
-                InformationManager.ShowInquiry(new InquiryData("Thank you", donationRejectedText, true, false, "Leave", string.Empty, null, null), false, false);
+                InformationManager.ShowInquiry(new InquiryData("Thank you", GameTexts.FindText("settlement_donation_rejected_description").ToString(), true, false, "Leave", string.Empty, null, null), false, false);
             }
         }
 
@@ -212,7 +193,7 @@ namespace ThePhilanthropist.src
 
                 if (donationAmount > Hero.MainHero.Gold)
                 {
-                    warningText = "You don't have enough {GOLD_ICON}";
+                    warningText = GameTexts.FindText("str_decision_not_enough_gold").ToString();
                 }
                 else
                 {
@@ -231,10 +212,12 @@ namespace ThePhilanthropist.src
             float prosperityNeeded = limit - currentProsperity;
             
             int goldNeededToReachMaxProsperity = (int)Math.Round(prosperityNeeded * 12f, MidpointRounding.AwayFromZero);
+            TextObject warningText = GameTexts.FindText("settlement_donation_warning");
+            warningText.SetTextVariable("GOLD_AMOUNT", goldNeededToReachMaxProsperity);
 
-            return donationAmount <= goldNeededToReachMaxProsperity ? string.Empty : $"You can only donate {goldNeededToReachMaxProsperity}" +
-                " {GOLD_ICON} or else the lord of this settlement will speculate on your intentions.";
+            return donationAmount <= goldNeededToReachMaxProsperity ? string.Empty : warningText.ToString();
         }
+
         private void DisplayMessage(string text)
         {
             InformationManager.DisplayMessage(new InformationMessage(text));

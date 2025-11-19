@@ -1,36 +1,41 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Module xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd" >
-  <Id value="$moduleid$" />
-  <Name value="$modulename$" />
-  <Version value="v$version$" />
-  <DefaultModule value="false" />
-  <ModuleCategory value="Singleplayer"/>
-  <ModuleType value="Community" />
-  <Url value="$moduleurl$" />
-  <DependedModules>
-    <DependedModule Id="Native" DependentVersion="v1.2.12" />
-    <DependedModule Id="SandBoxCore" DependentVersion="v1.2.12" />
-    <DependedModule Id="Sandbox" DependentVersion="v1.2.12" />
-    <DependedModule Id="StoryMode" DependentVersion="v1.2.12" />
-    <DependedModule Id="CustomBattle" DependentVersion="v1.2.12" />
-  </DependedModules>
-  <!-- Community Dependency Metadata -->
-  <!-- https://github.com/BUTR/Bannerlord.BLSE#community-dependency-metadata -->
-  <DependedModuleMetadatas>
-    <DependedModuleMetadata id="Native" order="LoadBeforeThis" version="v1.2.12" />
-    <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" version="v1.2.12" />
-    <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="v1.2.12" />
-    <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" version="v1.2.12" />
-    <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" version="v1.2.12" />
-  </DependedModuleMetadatas>
-  <!-- Community Dependency Metadata -->
-  <SubModules>
-    <SubModule>
-      <Name value="$modulename$" />
-      <DLLName value="$moduleid$.dll" />
-      <SubModuleClassType value="$moduleid$.src.SubModule" />
-      <Tags />
-    </SubModule>
-  </SubModules>
+    <Id value="$moduleid$" />
+    <Name value="$modulename$" />
+    <Version value="v$version$" />
+    <DefaultModule value="false" />
+    <ModuleCategory value="Singleplayer"/>
+    <ModuleType value="Community" />
+    <Url value="$moduleurl$" />
+    <DependedModules>
+        <DependedModule Id="Native" DependentVersion="v1.2.12" />
+        <DependedModule Id="SandBoxCore" DependentVersion="v1.2.12" />
+        <DependedModule Id="Sandbox" DependentVersion="v1.2.12" />
+        <DependedModule Id="StoryMode" DependentVersion="v1.2.12" />
+        <DependedModule Id="CustomBattle" DependentVersion="v1.2.12" />
+    </DependedModules>
+    <!-- Community Dependency Metadata -->
+    <!-- https://github.com/BUTR/Bannerlord.BLSE#community-dependency-metadata -->
+    <DependedModuleMetadatas>
+        <DependedModuleMetadata id="Native" order="LoadBeforeThis" version="v1.2.12" />
+        <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" version="v1.2.12" />
+        <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="v1.2.12" />
+        <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" version="v1.2.12" />
+        <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" version="v1.2.12" />
+    </DependedModuleMetadatas>
+    <!-- Community Dependency Metadata -->
+    <SubModules>
+        <SubModule>
+            <Name value="$modulename$" />
+            <DLLName value="$moduleid$.dll" />
+            <SubModuleClassType value="$moduleid$.src.SubModule" />
+            <Tags />
+        </SubModule>
+    </SubModules>
+    <Xmls>
+        <XmlNode>
+	        <XmlName id="GameText" path="module_strings" />
+        </XmlNode>
+    </Xmls>
 </Module>
