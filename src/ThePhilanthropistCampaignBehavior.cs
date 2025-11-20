@@ -1,4 +1,5 @@
 ﻿using Helpers;
+using MCM.Abstractions.Base.Global;
 using SandBox.CampaignBehaviors;
 using System;
 using System.Collections.Generic;
@@ -26,8 +27,7 @@ namespace ThePhilanthropist.src
 {
     public class ThePhilanthropistCampaignBehavior : CampaignBehaviorBase
     {
-        private const float TownProsperityLimit = 5000f;
-        private const float VillageHearthLimit = 600f;
+        private Settings _settings = GlobalSettings<Settings>.Instance!;
 
         public override void RegisterEvents()
         {
@@ -50,7 +50,8 @@ namespace ThePhilanthropist.src
             starter.AddGameMenuOption("village_looted", "rebuild_village", "Help rebuild {VILLAGE_NAME}", new GameMenuOption.OnConditionDelegate(rebuild_village_on_condition), 
                 new GameMenuOption.OnConsequenceDelegate(rebuild_village_on_consequence), false, -1, false, null);
 
-            starter.AddWaitGameMenu("rebuild_village", GameTexts.FindText("settlement_rebuild_description").ToString(), new OnInitDelegate(rebuild_village_on_init), new OnConditionDelegate(back_on_condition), new OnConsequenceDelegate(wait_menu_rebuild_village_on_consequence),
+            starter.AddWaitGameMenu("rebuild_village", GameTexts.FindText("settlement_rebuild_description").ToString(), new OnInitDelegate(rebuild_village_on_init), 
+                new OnConditionDelegate(back_on_condition), new OnConsequenceDelegate(wait_menu_rebuild_village_on_consequence),
                 new OnTickDelegate(wait_menu_rebuild_village_on_tick), GameMenu.MenuAndOptionType.WaitMenuShowOnlyProgressOption,
                 GameOverlays.MenuOverlayType.None, 0f, GameMenu.MenuFlags.None, null);
             starter.AddGameMenuOption("rebuild_village", "rebuild_village_end", "End Rebuilding", new GameMenuOption.OnConditionDelegate(leave_on_condition),
@@ -67,6 +68,7 @@ namespace ThePhilanthropist.src
             args.optionLeaveType = GameMenuOption.LeaveType.Leave;
             return true;
         }
+
         private void OnHourlyTickSettlementEvent(Settlement settlement)
         {
             Settlement currentSettlement = Settlement.CurrentSettlement;
@@ -100,11 +102,10 @@ namespace ThePhilanthropist.src
 
         private bool rebuild_village_on_condition(MenuCallbackArgs args)
         {
-            MBTextManager.SetTextVariable("VILLAGE_NAME", PlayerEncounter.EncounterSettlement.Name, false);
+            MBTextManager.SetTextVariable("VILLAGE_NAME", Settlement.CurrentSettlement.Name, false);
             args.optionLeaveType = GameMenuOption.LeaveType.Craft;
             args.IsEnabled = !FactionManager.IsAtWarAgainstFaction(Hero.MainHero.MapFaction, Settlement.CurrentSettlement.MapFaction);
             args.Tooltip = args.IsEnabled ? null : GameTexts.FindText("enemy_settlement_rebuild_warning");
-
             return true;
         }
 
@@ -126,14 +127,14 @@ namespace ThePhilanthropist.src
             Settlement settlement = Settlement.CurrentSettlement;
             string donationText = GameTexts.FindText("settlement_donation_description").ToString();
 
-            if (settlement.IsTown && settlement.Town.Prosperity < TownProsperityLimit)
+            if (settlement.IsTown && settlement.Town.Prosperity < _settings.DonateTownProsperityMax)
             {
                 TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(OnDonateToSettlement), 
                     null, false, new Func<string, Tuple<bool, string>>(IsDonationTextValid), "", "");
 
                 InformationManager.ShowTextInquiry(data, false, false);
             }
-            else if (settlement.IsVillage && settlement.Village.Hearth < VillageHearthLimit)
+            else if (settlement.IsVillage && settlement.Village.Hearth < _settings.DonateVillageProsperityMax)
             {
                 TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(OnDonateToSettlement), 
                     null, false, new Func<string, Tuple<bool, string>>(IsDonationTextValid), "", "");
@@ -150,21 +151,21 @@ namespace ThePhilanthropist.src
         {
             if (!int.TryParse(text, out int donationAmount))
             {
-                DisplayMessage("Invalid Input! Should not hit this point.");
+                InformationManager.DisplayMessage(new InformationMessage("Invalid Input! Should not hit this point."));
                 return;
             }
 
             Settlement settlement = Settlement.CurrentSettlement;
-            float prosperityIncreaseAmount = donationAmount / 12f;
+            float prosperityIncreaseAmount = donationAmount / (float)_settings.GoldToProsperityRatio;
 
             if (settlement.IsTown)
             {
-                settlement.Town.Prosperity = settlement.Town.Prosperity + prosperityIncreaseAmount > TownProsperityLimit ? TownProsperityLimit : 
+                settlement.Town.Prosperity = settlement.Town.Prosperity + prosperityIncreaseAmount > _settings.DonateTownProsperityMax ? _settings.DonateTownProsperityMax : 
                     settlement.Town.Prosperity + prosperityIncreaseAmount;
             }
             else if (settlement.IsVillage)
             {
-                settlement.Village.Hearth = settlement.Village.Hearth + prosperityIncreaseAmount > VillageHearthLimit ? VillageHearthLimit : 
+                settlement.Village.Hearth = settlement.Village.Hearth + prosperityIncreaseAmount > _settings.DonateVillageProsperityMax ? _settings.DonateVillageProsperityMax : 
                     settlement.Village.Hearth + prosperityIncreaseAmount;
             }
 
@@ -199,12 +200,12 @@ namespace ThePhilanthropist.src
                 }
                 else
                 {
-                    warningText = settlement.IsTown ? GetDonationWarnMessage(TownProsperityLimit, settlement.Town.Prosperity, donationAmount) : 
-                        GetDonationWarnMessage(VillageHearthLimit, settlement.Village.Hearth, donationAmount);
+                    warningText = settlement.IsTown ? GetDonationWarnMessage(_settings.DonateTownProsperityMax, settlement.Town.Prosperity, donationAmount) : 
+                        GetDonationWarnMessage(_settings.DonateVillageProsperityMax, settlement.Village.Hearth, donationAmount);
                 }
             }
 
-            isDonationValid = warningText.Equals(string.Empty) ? true : false;
+            isDonationValid = warningText.Equals(string.Empty);
 
             return new Tuple<bool, string>(isDonationValid, warningText);
         }
@@ -213,16 +214,11 @@ namespace ThePhilanthropist.src
         {
             float prosperityNeeded = limit - currentProsperity;
             
-            int goldNeededToReachMaxProsperity = (int)Math.Round(prosperityNeeded * 12f, MidpointRounding.AwayFromZero);
+            int goldNeededToReachMaxProsperity = (int)Math.Round(prosperityNeeded * _settings.GoldToProsperityRatio, MidpointRounding.AwayFromZero);
             TextObject warningText = Settlement.CurrentSettlement.Owner == Hero.MainHero ? GameTexts.FindText("settlement_donation_warning_owner") : GameTexts.FindText("settlement_donation_warning_non_owner");
             warningText.SetTextVariable("GOLD_AMOUNT", goldNeededToReachMaxProsperity);
 
             return donationAmount <= goldNeededToReachMaxProsperity ? string.Empty : warningText.ToString();
-        }
-
-        private void DisplayMessage(string text)
-        {
-            InformationManager.DisplayMessage(new InformationMessage(text));
         }
 
         public override void SyncData(IDataStore dataStore)

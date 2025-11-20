@@ -3,13 +3,13 @@
 Bannerlord mod with goal of roleplaying as a philanthropist.
 
 Features:
-- Donate to towns/villages to increase prosperity. Prosperity Cap: Town(5000), Village(600)
-- Help rebuild a raided village, troop strength can make rebuilding faster.
-
-Plan on implementing:
-1. Donating gold to notables to increase power which will increase odds of higher tier troops
-2. Settings menu to adjust factors such as gold to prosperity ratio, prosperity cap, etc.
-3. Player can be ambushed somehow because his donations have attracted greedy eyes
+- Donate to towns/villages to increase prosperity.
+- Help rebuild a raided village, higher troop strength can make rebuilding faster.
+- Settings menu to modify variables while in game.
 
 Credits:
 - Bannerlord.Module.Template by BUTR | https://github.com/BUTR/Bannerlord.Module.Template
+- Bannerlord.Harmony by BUTR | https://github.com/BUTR/Bannerlord.Harmony
+- Bannerlord.ButterLib by BUTR | https://github.com/BUTR/Bannerlord.ButterLib
+- Bannerlord.UIExtenderEx | https://github.com/BUTR/Bannerlord.UIExtenderEx
+- Bannerlord.MBOptionScreen | https://github.com/Aragas/Bannerlord.MBOptionScreen
