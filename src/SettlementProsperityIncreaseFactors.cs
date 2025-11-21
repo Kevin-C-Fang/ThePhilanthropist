@@ -1,4 +1,5 @@
-﻿using TaleWorlds.SaveSystem;
+﻿using System.Collections.Generic;
+using TaleWorlds.SaveSystem;
 
 
 namespace ThePhilanthropist.src
@@ -24,9 +25,9 @@ namespace ThePhilanthropist.src
 
         public float DecreaseProsperityIncreaseTotal()
         {
-            float descreasedProsperityIncreaseTotal = ProsperityIncreaseTotal - ProsperityIncreaseOverTime;
+            float decreasedProsperityIncreaseTotal = ProsperityIncreaseTotal - ProsperityIncreaseOverTime;
 
-            if (descreasedProsperityIncreaseTotal <= 0f)
+            if (decreasedProsperityIncreaseTotal <= 0f)
             {
                 ProsperityIncreaseTotal = 0f;
                 float currProsperityIncreaseOverTime = ProsperityIncreaseOverTime;
@@ -43,6 +44,11 @@ namespace ThePhilanthropist.src
         public void UpdateProsperityIncreaseOverTimeUsingDuration(Settings settings)
         {
             ProsperityIncreaseOverTime = ProsperityIncreaseTotal / settings.ProsperityDurationIncrease;
+        }
+
+        public bool CanDecreaseProsperityCheck()
+        {
+            return ProsperityIncreaseTotal >= 0f && ProsperityIncreaseOverTime >= 0f;
         }
     }
 }

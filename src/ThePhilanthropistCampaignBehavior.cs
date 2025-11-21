@@ -44,16 +44,22 @@ namespace ThePhilanthropist.src
         {
             if (e.PropertyName == nameof(_settings.ProsperityDurationIncrease))
             {
-                foreach(SettlementProsperityIncreaseFactors factors in SettlementProsperityIncreaseTracker.Values)
-                {
-                    factors.UpdateProsperityIncreaseOverTimeUsingDuration(_settings);
-                }
+                PropagateDurationProsperityIncreaseChange();
+            }
+        }
+
+        private void PropagateDurationProsperityIncreaseChange()
+        {
+            foreach (SettlementProsperityIncreaseFactors factors in SettlementProsperityIncreaseTracker.Values)
+            {
+                factors.UpdateProsperityIncreaseOverTimeUsingDuration(_settings);
             }
         }
 
         private void OnSessionLaunched(CampaignGameStarter starter)
         {
             AddGameMenus(starter);
+            PropagateDurationProsperityIncreaseChange();
         }
 
         private void AddGameMenus(CampaignGameStarter starter)
@@ -78,9 +84,12 @@ namespace ThePhilanthropist.src
         {
             if (_settings.EnableProsperityIncreaseOverTime && SettlementProsperityIncreaseTracker.ContainsKey(settlement.StringId))
             {
-                float prosperityIncreaseAmount = SettlementProsperityIncreaseTracker[settlement.StringId].DecreaseProsperityIncreaseTotal();
+                if (SettlementProsperityIncreaseTracker[settlement.StringId].CanDecreaseProsperityCheck())
+                {
+                    float prosperityIncreaseAmount = SettlementProsperityIncreaseTracker[settlement.StringId].DecreaseProsperityIncreaseTotal();
 
-                IncreaseSettlementProsperityOrHearth(settlement, prosperityIncreaseAmount);
+                    IncreaseSettlementProsperityOrHearth(settlement, prosperityIncreaseAmount);
+                }
             }
         }
 
