@@ -3,6 +3,7 @@ using MCM.Abstractions.Base.Global;
 using SandBox.CampaignBehaviors;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
@@ -20,6 +21,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
+using TaleWorlds.SaveSystem;
 using MathF = TaleWorlds.Library.MathF;
 
 
@@ -27,12 +29,26 @@ namespace ThePhilanthropist.src
 {
     public class ThePhilanthropistCampaignBehavior : CampaignBehaviorBase
     {
+        private Dictionary<string, SettlementProsperityIncreaseFactors> SettlementProsperityIncreaseTracker = new Dictionary<string, SettlementProsperityIncreaseFactors>();
         private Settings _settings = GlobalSettings<Settings>.Instance!;
 
         public override void RegisterEvents()
         {
             CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
             CampaignEvents.HourlyTickSettlementEvent.AddNonSerializedListener(this, OnHourlyTickSettlementEvent);
+            CampaignEvents.DailyTickSettlementEvent.AddNonSerializedListener(this, OnDailyTickSettlementEvent);
+            _settings.PropertyChanged += HandleProsperityDurationIncrease;
+        }
+
+        private void HandleProsperityDurationIncrease(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(_settings.ProsperityDurationIncrease))
+            {
+                foreach(SettlementProsperityIncreaseFactors factors in SettlementProsperityIncreaseTracker.Values)
+                {
+                    factors.UpdateProsperityIncreaseOverTimeUsingDuration(_settings);
+                }
+            }
         }
 
         private void OnSessionLaunched(CampaignGameStarter starter)
@@ -58,6 +74,16 @@ namespace ThePhilanthropist.src
                 new GameMenuOption.OnConsequenceDelegate(wait_menu_end_rebuilding_on_consequence), true, -1, false, null);
         }
 
+        private void OnDailyTickSettlementEvent(Settlement settlement)
+        {
+            if (_settings.EnableProsperityIncreaseOverTime && SettlementProsperityIncreaseTracker.ContainsKey(settlement.StringId))
+            {
+                float prosperityIncreaseAmount = SettlementProsperityIncreaseTracker[settlement.StringId].DecreaseProsperityIncreaseTotal();
+
+                IncreaseSettlementProsperityOrHearth(settlement, prosperityIncreaseAmount);
+            }
+        }
+
         private void wait_menu_end_rebuilding_on_consequence(MenuCallbackArgs args)
         {
             PlayerEncounter.Finish(true);
@@ -72,8 +98,7 @@ namespace ThePhilanthropist.src
         private void OnHourlyTickSettlementEvent(Settlement settlement)
         {
             Settlement currentSettlement = Settlement.CurrentSettlement;
-
-            if (settlement.Equals(currentSettlement) && settlement.IsRaided)
+            if (settlement == currentSettlement && settlement.IsRaided)
             {
                 ExplainedNumber explainedNumber = new ExplainedNumber(0.02f + MobileParty.MainParty.Party.TotalStrength/6000f, false, null);
                 IncreaseSettlementHealthAction.Apply(currentSettlement, explainedNumber.ResultNumber);
@@ -158,19 +183,24 @@ namespace ThePhilanthropist.src
             Settlement settlement = Settlement.CurrentSettlement;
             float prosperityIncreaseAmount = donationAmount / (float)_settings.GoldToProsperityRatio;
 
-            if (settlement.IsTown)
+            if (_settings.EnableProsperityIncreaseOverTime)
             {
-                settlement.Town.Prosperity = settlement.Town.Prosperity + prosperityIncreaseAmount > _settings.DonateTownProsperityMax ? _settings.DonateTownProsperityMax : 
-                    settlement.Town.Prosperity + prosperityIncreaseAmount;
+                if (SettlementProsperityIncreaseTracker.ContainsKey(settlement.StringId))
+                {
+                    SettlementProsperityIncreaseTracker[settlement.StringId].IncreaseProsperityIncreaseTotal(prosperityIncreaseAmount, _settings);
+                }
+                else
+                {
+                    SettlementProsperityIncreaseTracker.Add(settlement.StringId, new SettlementProsperityIncreaseFactors(prosperityIncreaseAmount, _settings));
+                }
             }
-            else if (settlement.IsVillage)
+            else
             {
-                settlement.Village.Hearth = settlement.Village.Hearth + prosperityIncreaseAmount > _settings.DonateVillageProsperityMax ? _settings.DonateVillageProsperityMax : 
-                    settlement.Village.Hearth + prosperityIncreaseAmount;
+                IncreaseSettlementProsperityOrHearth(settlement, prosperityIncreaseAmount);
+                Campaign.Current.CurrentMenuContext.Refresh();
             }
 
             Hero.MainHero.ChangeHeroGold(-donationAmount);
-            Campaign.Current.CurrentMenuContext.Refresh();
         }
 
         private Tuple<bool, string> IsDonationTextValid(string text)
@@ -210,6 +240,20 @@ namespace ThePhilanthropist.src
             return new Tuple<bool, string>(isDonationValid, warningText);
         }
 
+        private void IncreaseSettlementProsperityOrHearth(Settlement settlement, float prosperityIncreaseAmount)
+        {
+            if (settlement.IsTown)
+            {
+                settlement.Town.Prosperity = settlement.Town.Prosperity + prosperityIncreaseAmount > _settings.DonateTownProsperityMax ? _settings.DonateTownProsperityMax :
+                    settlement.Town.Prosperity + prosperityIncreaseAmount;
+            }
+            else if (settlement.IsVillage)
+            {
+                settlement.Village.Hearth = settlement.Village.Hearth + prosperityIncreaseAmount > _settings.DonateVillageProsperityMax ? _settings.DonateVillageProsperityMax :
+                    settlement.Village.Hearth + prosperityIncreaseAmount;
+            }
+        }
+
         private string GetDonationWarnMessage(float limit, float currentProsperity, int donationAmount)
         {
             float prosperityNeeded = limit - currentProsperity;
@@ -223,7 +267,7 @@ namespace ThePhilanthropist.src
 
         public override void SyncData(IDataStore dataStore)
         {
-
+            dataStore.SyncData("ThePhilanthropist", ref SettlementProsperityIncreaseTracker);
         }
     }
 }
