@@ -12,7 +12,6 @@ using TaleWorlds.CampaignSystem.ComponentInterfaces;
 using TaleWorlds.CampaignSystem.Encounters;
 using TaleWorlds.CampaignSystem.GameMenus;
 using TaleWorlds.CampaignSystem.GameState;
-using TaleWorlds.CampaignSystem.Overlay;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.CampaignSystem.ViewModelCollection;
@@ -75,7 +74,7 @@ namespace ThePhilanthropist.src
             starter.AddWaitGameMenu("rebuild_village", GameTexts.FindText("settlement_rebuild_description").ToString(), new OnInitDelegate(rebuild_village_on_init), 
                 new OnConditionDelegate(back_on_condition), new OnConsequenceDelegate(wait_menu_rebuild_village_on_consequence),
                 new OnTickDelegate(wait_menu_rebuild_village_on_tick), GameMenu.MenuAndOptionType.WaitMenuShowOnlyProgressOption,
-                GameOverlays.MenuOverlayType.None, 0f, GameMenu.MenuFlags.None, null);
+                GameMenu.MenuOverlayType.None, 0f, GameMenu.MenuFlags.None, null);
             starter.AddGameMenuOption("rebuild_village", "rebuild_village_end", "End Rebuilding", new GameMenuOption.OnConditionDelegate(leave_on_condition),
                 new GameMenuOption.OnConsequenceDelegate(wait_menu_end_rebuilding_on_consequence), true, -1, false, null);
         }
@@ -109,7 +108,7 @@ namespace ThePhilanthropist.src
             Settlement currentSettlement = Settlement.CurrentSettlement;
             if (settlement == currentSettlement && settlement.IsRaided)
             {
-                ExplainedNumber explainedNumber = new ExplainedNumber(0.02f + MobileParty.MainParty.Party.TotalStrength/6000f, false, null);
+                ExplainedNumber explainedNumber = new ExplainedNumber(0.02f + MobileParty.MainParty.Party.EstimatedStrength/6000f, false, null);
                 IncreaseSettlementHealthAction.Apply(currentSettlement, explainedNumber.ResultNumber);
             }
         }

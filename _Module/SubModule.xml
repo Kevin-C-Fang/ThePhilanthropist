@@ -13,11 +13,11 @@
 		<DependedModule Id="Bannerlord.ButterLib"/>
 		<DependedModule Id="Bannerlord.UIExtenderEx"/>
 		<DependedModule Id="Bannerlord.MBOptionScreen"/>
-		<DependedModule Id="Native" DependentVersion="v1.2.12" />
-        <DependedModule Id="SandBoxCore" DependentVersion="v1.2.12" />
-        <DependedModule Id="Sandbox" DependentVersion="v1.2.12" />
-        <DependedModule Id="StoryMode" DependentVersion="v1.2.12" />
-        <DependedModule Id="CustomBattle" DependentVersion="v1.2.12" />
+		<DependedModule Id="Native" DependentVersion="v1.3.9" />
+        <DependedModule Id="SandBoxCore" DependentVersion="v1.3.9" />
+        <DependedModule Id="Sandbox" DependentVersion="v1.3.9" />
+        <DependedModule Id="StoryMode" DependentVersion="v1.3.9" />
+        <DependedModule Id="CustomBattle" DependentVersion="v1.3.9" />
     </DependedModules>
     <!-- Community Dependency Metadata -->
     <!-- https://github.com/BUTR/Bannerlord.BLSE#community-dependency-metadata -->
@@ -26,11 +26,11 @@
 		<DependedModuleMetadata id="Bannerlord.ButterLib" order="LoadBeforeThis"/>
 		<DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis"/>
 		<DependedModuleMetadata id="Bannerlord.MBOptionScreen" order="LoadBeforeThis"/>
-		<DependedModuleMetadata id="Native" order="LoadBeforeThis" version="v1.2.12" />
-        <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" version="v1.2.12" />
-        <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="v1.2.12" />
-        <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" version="v1.2.12" />
-        <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" version="v1.2.12" />
+		<DependedModuleMetadata id="Native" order="LoadBeforeThis" version="v1.3.9" />
+        <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" version="v1.3.9" />
+        <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="v1.3.9" />
+        <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" version="v1.3.9" />
+        <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" version="v1.3.9" />
     </DependedModuleMetadatas>
     <!-- Community Dependency Metadata -->
     <SubModules>
