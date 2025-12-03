@@ -34,12 +34,15 @@
     </DependedModuleMetadatas>
     <!-- Community Dependency Metadata -->
     <SubModules>
-        <SubModule>
-            <Name value="$modulename$" />
-            <DLLName value="$moduleid$.dll" />
-            <SubModuleClassType value="$moduleid$.src.SubModule" />
-            <Tags />
-        </SubModule>
+		<!-- Bannerlord Module Loader. Do not change the name! -->
+		<SubModule>
+			<Name value="Bannerlord Module Loader" />
+			<DLLName value="Bannerlord.ModuleLoader.$moduleid$.dll" />
+			<SubModuleClassType value="Bannerlord.ModuleLoader.$moduleid$" />
+			<Tags>
+				<Tag key="LoaderFilter" value ="$moduleid$.*.dll" />
+			</Tags>
+		</SubModule>
     </SubModules>
     <Xmls>
         <XmlNode>
