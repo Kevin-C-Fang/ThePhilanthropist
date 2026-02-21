@@ -7,21 +7,39 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaleWorlds.LinQuick;
+using static TaleWorlds.Library.VirtualFolders.Win64_Shipping_Client;
 
 namespace ThePhilanthropist.src
 {
     public class Settings : AttributeGlobalSettings<Settings>
     {
+        public const float MaxTownProsperityFromDonationMinLimit = 0f;
+        public const float MaxTownProsperityFromDonationMaxLimit = 50000f;
+
+        private float _maxTownProsperityFromDonation = 5000f;
+
+        private int _prosperityDurationIncrease = 3;
+
         public override string Id => "ThePhilanthropist";
         public override string DisplayName => "The Philanthropist";
         public override string FolderName => "ThePhilanthropist";
         public override string FormatType => "json";
 
-        private int _prosperityDurationIncrease = 3;
-
-        [SettingPropertyFloatingInteger("Donate Town Prosperity Max", 0f, 50000f, HintText = "Max town prosperity that can be increased through donating.", RequireRestart = false)]
+        [SettingPropertyFloatingInteger("Max Town Prosperity From Donation", MaxTownProsperityFromDonationMinLimit, MaxTownProsperityFromDonationMaxLimit, HintText = "Max town prosperity that can be increased through donating.", RequireRestart = false)]
         [SettingPropertyGroup("General")]
-        public float DonateTownProsperityMax { get; set; } = 5000f;
+        public float MaxTownProsperityFromDonation
+        {
+            get => _maxTownProsperityFromDonation;
+            set
+            {
+                var clamped = Math.Min(Math.Max(value, MaxTownProsperityFromDonationMinLimit), MaxTownProsperityFromDonationMaxLimit);
+                if (_maxTownProsperityFromDonation != clamped)
+                {
+                    _maxTownProsperityFromDonation = clamped;
+                }
+            }
+        }
 
         [SettingPropertyFloatingInteger("Donate Village Prosperity Max", 0f, 6000f, HintText = "Max village prosperity that can be increased through donating.", RequireRestart = false)]
         [SettingPropertyGroup("General")]

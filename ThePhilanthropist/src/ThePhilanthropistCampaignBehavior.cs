@@ -160,7 +160,7 @@ namespace ThePhilanthropist.src
             Settlement settlement = Settlement.CurrentSettlement;
             string donationText = GameTexts.FindText("settlement_donation_description").ToString();
 
-            if (settlement.IsTown && settlement.Town.Prosperity < _settings.DonateTownProsperityMax)
+            if (settlement.IsTown && settlement.Town.Prosperity < _settings.MaxTownProsperityFromDonation)
             {
                 TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(OnDonateToSettlement), 
                     null, false, new Func<string, Tuple<bool, string>>(IsDonationTextValid), "", "");
@@ -238,7 +238,7 @@ namespace ThePhilanthropist.src
                 }
                 else
                 {
-                    warningText = settlement.IsTown ? GetDonationWarnMessage(_settings.DonateTownProsperityMax, settlement.Town.Prosperity, donationAmount) : 
+                    warningText = settlement.IsTown ? GetDonationWarnMessage(_settings.MaxTownProsperityFromDonation, settlement.Town.Prosperity, donationAmount) : 
                         GetDonationWarnMessage(_settings.DonateVillageProsperityMax, settlement.Village.Hearth, donationAmount);
                 }
             }
@@ -252,7 +252,7 @@ namespace ThePhilanthropist.src
         {
             if (settlement.IsTown)
             {
-                settlement.Town.Prosperity = settlement.Town.Prosperity + prosperityIncreaseAmount > _settings.DonateTownProsperityMax ? _settings.DonateTownProsperityMax :
+                settlement.Town.Prosperity = settlement.Town.Prosperity + prosperityIncreaseAmount > _settings.MaxTownProsperityFromDonation ? _settings.MaxTownProsperityFromDonation :
                     settlement.Town.Prosperity + prosperityIncreaseAmount;
             }
             else if (settlement.IsVillage)
