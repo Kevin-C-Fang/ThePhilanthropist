@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TaleWorlds.SaveSystem;
 
 
@@ -7,10 +8,35 @@ namespace ThePhilanthropist.src
     public class SettlementProsperityIncreaseFactors
     {
         [SaveableField(1)]
-        public float ProsperityIncreaseTotal;
+        public float _prosperityIncreaseTotal;
 
         [SaveableField(2)]
-        public float ProsperityIncreaseOverTime;
+        public float _prosperityIncreaseOverTime;
+        
+        public float ProsperityIncreaseTotal
+        {
+            get => _prosperityIncreaseTotal;
+            set
+            {
+                value = value < 0 ? 0 : value;
+                if (_prosperityIncreaseTotal != value)
+                {
+                    _prosperityIncreaseTotal = value;
+                }
+            }
+        }
+
+        public float ProsperityIncreaseOverTime
+        {
+            get => _prosperityIncreaseOverTime;
+            set
+            {
+                if (_prosperityIncreaseOverTime != value)
+                {
+                    _prosperityIncreaseOverTime = value;
+                }
+            }
+        }
 
         public SettlementProsperityIncreaseFactors(float prosperityIncreaseTotal, Settings settings)
         {
@@ -48,7 +74,7 @@ namespace ThePhilanthropist.src
 
         public bool CanDecreaseProsperityCheck()
         {
-            return ProsperityIncreaseTotal >= 0f && ProsperityIncreaseOverTime >= 0f;
+            return ProsperityIncreaseTotal > 0f && ProsperityIncreaseOverTime > 0f;
         }
     }
 }
