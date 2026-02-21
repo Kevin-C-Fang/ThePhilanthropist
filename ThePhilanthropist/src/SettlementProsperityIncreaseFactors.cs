@@ -43,7 +43,7 @@ namespace ThePhilanthropist.src
 
         public void UpdateProsperityIncreaseOverTimeUsingDuration(Settings settings)
         {
-            ProsperityIncreaseOverTime = ProsperityIncreaseTotal / settings.ProsperityDurationIncrease;
+            ProsperityIncreaseOverTime = ProsperityIncreaseTotal / settings.DurationOfProsperityIncrease;
         }
 
         public bool CanDecreaseProsperityCheck()

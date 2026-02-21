@@ -16,10 +16,17 @@ namespace ThePhilanthropist.src
     {
         public const float MaxTownProsperityFromDonationMinLimit = 0f;
         public const float MaxTownProsperityFromDonationMaxLimit = 50000f;
+        public const float MaxVillageProsperityFromDonationMinLimit = 0f;
+        public const float MaxVillageProsperityFromDonationMaxLimit = 6000f;
+        public const int GoldToProsperityRatioMinLimit = 1;
+        public const int GoldToProsperityRatioMaxLimit = 120;
+        public const int DurationOfProsperityIncreaseMinLimit = 1;
+        public const int DurationOfProsperityIncreaseMaxLimit = 14;
 
         private float _maxTownProsperityFromDonation = 5000f;
-
-        private int _prosperityDurationIncrease = 3;
+        private float _maxVillageProsperityFromDonation = 600f;
+        private int _goldToProsperityRatio = 12;
+        private int _durationOfProsperityIncrease = 3;
 
         public override string Id => "ThePhilanthropist";
         public override string DisplayName => "The Philanthropist";
@@ -41,31 +48,55 @@ namespace ThePhilanthropist.src
             }
         }
 
-        [SettingPropertyFloatingInteger("Donate Village Prosperity Max", 0f, 6000f, HintText = "Max village prosperity that can be increased through donating.", RequireRestart = false)]
+        [SettingPropertyFloatingInteger("Max Village Prosperity From Donation", MaxVillageProsperityFromDonationMinLimit, MaxVillageProsperityFromDonationMaxLimit, HintText = "Max village prosperity that can be increased through donating.", RequireRestart = false)]
         [SettingPropertyGroup("General")]
-        public float DonateVillageProsperityMax { get; set; } = 600f;
+        public float MaxVillageProsperityFromDonation
+        {
+            get => _maxVillageProsperityFromDonation;
+            set
+            {
+                var clamped = Math.Min(Math.Max(value, MaxVillageProsperityFromDonationMinLimit), MaxVillageProsperityFromDonationMaxLimit);
+                if (_maxVillageProsperityFromDonation != clamped)
+                {
+                    _maxVillageProsperityFromDonation = clamped;
+                }
+            }
+        }
 
-        [SettingPropertyInteger("Gold To Prosperity Ratio", 1, 120, HintText = "Amount of gold required to increase prosperity by 1.", RequireRestart = false)]
+        [SettingPropertyInteger("Gold To Prosperity Ratio", GoldToProsperityRatioMinLimit, GoldToProsperityRatioMaxLimit, HintText = "Amount of gold required to increase prosperity by 1.", RequireRestart = false)]
         [SettingPropertyGroup("General")]
-        public int GoldToProsperityRatio { get; set; } = 12;
+        public int GoldToProsperityRatio
+        {
+            get => _goldToProsperityRatio;
+            set
+            {
+                var clamped = Math.Min(Math.Max(value, GoldToProsperityRatioMinLimit), GoldToProsperityRatioMaxLimit);
+                if (_goldToProsperityRatio != clamped)
+                {
+                    _goldToProsperityRatio = clamped;
+                }
+            }
+        }
 
         [SettingPropertyBool("Husia - Enable Prosperity Increase Over Time", IsToggle = true, HintText = "Prosperity will increase over time instead of occurring immediately.", RequireRestart = false)]
         [SettingPropertyGroup("Husia - Enable Prosperity Increase Over Time")]
         public bool EnableProsperityIncreaseOverTime { get; set; } = false;
 
-        [SettingPropertyInteger("Duration of Prosperity Increase", 1, 14, HintText = "Amount of days to increase prosperity over time.", RequireRestart = false)]
+        [SettingPropertyInteger("Duration of Prosperity Increase", DurationOfProsperityIncreaseMinLimit, DurationOfProsperityIncreaseMaxLimit, HintText = "Amount of days to increase prosperity over time.", RequireRestart = false)]
         [SettingPropertyGroup("Husia - Enable Prosperity Increase Over Time")]
-        public int ProsperityDurationIncrease {
+        public int DurationOfProsperityIncrease
+        {
             get
             {
-                return _prosperityDurationIncrease;
+                return _durationOfProsperityIncrease;
             }
             set
             {
-                if (_prosperityDurationIncrease != value)
+                var clamped = Math.Min(Math.Max(value, DurationOfProsperityIncreaseMinLimit), DurationOfProsperityIncreaseMaxLimit);
+                if (_durationOfProsperityIncrease != clamped)
                 {
-                    _prosperityDurationIncrease = value;
-                    OnPropertyChanged(nameof(ProsperityDurationIncrease));
+                    _durationOfProsperityIncrease = clamped;
+                    OnPropertyChanged(nameof(DurationOfProsperityIncrease));
                 }
             }
         }

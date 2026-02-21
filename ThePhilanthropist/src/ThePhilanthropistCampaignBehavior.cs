@@ -36,18 +36,18 @@ namespace ThePhilanthropist.src
             CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
             CampaignEvents.HourlyTickSettlementEvent.AddNonSerializedListener(this, OnHourlyTickSettlementEvent);
             CampaignEvents.DailyTickSettlementEvent.AddNonSerializedListener(this, OnDailyTickSettlementEvent);
-            _settings.PropertyChanged += HandleProsperityDurationIncrease;
+            _settings.PropertyChanged += HandleDurationOfProsperityIncreaseChange;
         }
 
-        private void HandleProsperityDurationIncrease(object? sender, PropertyChangedEventArgs e)
+        private void HandleDurationOfProsperityIncreaseChange(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(_settings.ProsperityDurationIncrease))
+            if (e.PropertyName == nameof(_settings.DurationOfProsperityIncrease))
             {
-                PropagateDurationProsperityIncreaseChange();
+                PropagateDurationOfProsperityIncreaseChange();
             }
         }
 
-        private void PropagateDurationProsperityIncreaseChange()
+        private void PropagateDurationOfProsperityIncreaseChange()
         {
             foreach (SettlementProsperityIncreaseFactors factors in SettlementProsperityIncreaseTracker.Values)
             {
@@ -58,7 +58,7 @@ namespace ThePhilanthropist.src
         private void OnSessionLaunched(CampaignGameStarter starter)
         {
             AddGameMenus(starter);
-            PropagateDurationProsperityIncreaseChange();
+            PropagateDurationOfProsperityIncreaseChange();
         }
 
         private void AddGameMenus(CampaignGameStarter starter)
@@ -167,7 +167,7 @@ namespace ThePhilanthropist.src
 
                 InformationManager.ShowTextInquiry(data, false, false);
             }
-            else if (settlement.IsVillage && settlement.Village.Hearth < _settings.DonateVillageProsperityMax)
+            else if (settlement.IsVillage && settlement.Village.Hearth < _settings.MaxVillageProsperityFromDonation)
             {
                 TextInquiryData data = new TextInquiryData("Donation", donationText, true, true, "Donate", "Cancel", new Action<string>(OnDonateToSettlement), 
                     null, false, new Func<string, Tuple<bool, string>>(IsDonationTextValid), "", "");
@@ -239,7 +239,7 @@ namespace ThePhilanthropist.src
                 else
                 {
                     warningText = settlement.IsTown ? GetDonationWarnMessage(_settings.MaxTownProsperityFromDonation, settlement.Town.Prosperity, donationAmount) : 
-                        GetDonationWarnMessage(_settings.DonateVillageProsperityMax, settlement.Village.Hearth, donationAmount);
+                        GetDonationWarnMessage(_settings.MaxVillageProsperityFromDonation, settlement.Village.Hearth, donationAmount);
                 }
             }
 
@@ -257,7 +257,7 @@ namespace ThePhilanthropist.src
             }
             else if (settlement.IsVillage)
             {
-                settlement.Village.Hearth = settlement.Village.Hearth + prosperityIncreaseAmount > _settings.DonateVillageProsperityMax ? _settings.DonateVillageProsperityMax :
+                settlement.Village.Hearth = settlement.Village.Hearth + prosperityIncreaseAmount > _settings.MaxVillageProsperityFromDonation ? _settings.MaxVillageProsperityFromDonation :
                     settlement.Village.Hearth + prosperityIncreaseAmount;
             }
         }
